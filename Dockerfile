@@ -5,7 +5,7 @@ LABEL version="1.0"
 MAINTAINER Marc Peña Segarra <segarrra@gmail.com>
 
 # GR-GSM trx branch by axilirator
-RUN git clone --recursive --depth 1 https://github.com/axilirator/gr-gsm/ && \
+RUN git clone --recursive https://github.com/axilirator/gr-gsm/ && \
         cd gr-gsm && \
         git checkout fixeria/trx && \
         mkdir build && \
