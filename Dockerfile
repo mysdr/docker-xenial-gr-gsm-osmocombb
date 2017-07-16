@@ -1,6 +1,6 @@
 FROM pachulo/xenial-gnuradio-rtl-toolkit:latest
 
-LABEL version="1.0"
+LABEL version="1.1"
 
 MAINTAINER Marc Peña Segarra <segarrra@gmail.com>
 
@@ -19,11 +19,6 @@ COPY files/config.conf /root/.gnuradio/config.conf
 
 # Optional: you should run it in your system once to get the config
 #COPY files/volk_config-latitude-e6510 /root/.volk/volk_config
-
-ADD http://www.ks.uni-freiburg.de/download/misc/gsmframecoder.tar.gz /
-RUN tar xvf /gsmframecoder.tar.gz
-
-#COPY files/grgsm_livemon_wireshark.sh /root/grgsm_livemon_wireshark.sh
 
 # Tell debconf to run in non-interactive mode (but just during the image build).
 ARG DEBIAN_FRONTEND=noninteractive
@@ -51,34 +46,11 @@ RUN git clone git://git.osmocom.org/libosmocore.git && \
         make install && \
         ldconfig -i
 # ---
-# GNU ARM toolchain
-# https://osmocom.org/projects/baseband/wiki/GnuArmToolchain
-RUN mkdir -p gnu-arm && \
-        cd gnu-arm && \
-        wget https://osmocom.org/attachments/download/2052/gnu-arm-build.3.sh && \
-        chmod a+rx gnu-arm-build.3.sh && \
-        mkdir build install src && \
-        cd src && \
-        wget http://ftp.gnu.org/gnu/gcc/gcc-4.8.2/gcc-4.8.2.tar.bz2 && \
-        wget http://ftp.gnu.org/gnu/binutils/binutils-2.21.1a.tar.bz2 && \
-        wget ftp://sourceware.org/pub/newlib/newlib-1.19.0.tar.gz && \
-        cd .. && \
-        ./gnu-arm-build.3.sh && \
-        rm /gnu-arm/src/gcc-4.8.2.tar.bz2 /gnu-arm/src/binutils-2.21.1a.tar.bz2 /gnu-arm/src/newlib-1.19.0.tar.gz
-
-RUN echo export PATH=$PATH:/gnu-arm/install/bin >> /etc/bash.bashrc
-
-# ---
 # osmocom-bb branch sdr_phy
-RUN git clone git://git.osmocom.org/osmocom-bb.git && \
+RUN git clone git://git.osmocom.org/osmocom-bb.git -b fixeria/sdr_phy && \
         cd osmocom-bb && \
-        git checkout fixeria/sdr_phy && \
         git pull --rebase && \
         cd src && \
-        PATH=/gnu-arm/install/bin:$PATH make
-
-# Fix firt mobile run
-RUN mkdir -p /root/.osmocom/bb/ && \
-        touch /root/.osmocom/bb/mobile.cfg
+        make nofirmware
 
 ENTRYPOINT  ["/bin/bash"]
